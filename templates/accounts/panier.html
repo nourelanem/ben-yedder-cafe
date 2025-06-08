@@ -1,0 +1,546 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon Panier - Ben Yedder{% endblock %}
+
+{% block content %}
+<div class="panier-container">
+    <div class="panier-header">
+        <h1>🛒 Mon Panier</h1>
+        <p>Gérez vos articles avant de passer commande</p>
+    </div>
+
+    {% if panier_items %}
+        <div class="panier-content">
+            <div class="panier-items">
+                {% for item in panier_items %}
+                <div class="panier-item" data-item-id="{{ item.id }}">
+                    <div class="item-image">
+                        {% if item.produit.image %}
+                            <img src="{{ item.produit.image.url }}" alt="{{ item.produit.nom }}">
+                        {% else %}
+                            <div class="no-image">☕</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="item-details">
+                        <h3>{{ item.produit.nom }}</h3>
+                        <p class="item-description">{{ item.produit.description|truncatewords:15 }}</p>
+                        <div class="item-meta">
+                            <span class="item-category">{{ item.produit.categorie }}</span>
+                            {% if item.produit.stock < 5 %}
+                                <span class="stock-warning">⚠️ Stock limité</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="item-quantity">
+                        <label>Quantité</label>
+                        <div class="quantity-controls">
+                            <button type="button" class="qty-btn minus" onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                            <input type="number" value="{{ item.quantite }}" min="1" max="{{ item.produit.stock }}"
+                                   class="qty-input" onchange="setQuantity({{ item.id }}, this.value)">
+                            <button type="button" class="qty-btn plus" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="item-price">
+                        <div class="unit-price">{{ item.produit.prix }} DT</div>
+                        <div class="total-price">{{ item.total_price }} DT</div>
+                    </div>
+
+                    <div class="item-actions">
+                        <button type="button" class="btn-remove" onclick="removeItem({{ item.id }})">🗑️</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="panier-summary">
+                <div class="summary-card">
+                    <h3>📋 Résumé de la commande</h3>
+
+                    <div class="summary-line">
+                        <span>Sous-total ({{ total_items }} articles)</span>
+                        <span>{{ subtotal }} DT</span>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>Frais de livraison</span>
+                        <span>{{ shipping_cost|default:"Gratuit" }}</span>
+                    </div>
+
+                    {% if discount %}
+                    <div class="summary-line discount">
+                        <span>Réduction</span>
+                        <span>-{{ discount }} DT</span>
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="summary-total">
+                        <span><strong>Total</strong></span>
+                        <span><strong>{{ total }} DT</strong></span>
+                    </div>
+
+                    <div class="promo-code">
+                        <input type="text" placeholder="Code promo" id="promo-input">
+                        <button type="button" class="btn-promo" onclick="applyPromo()">Appliquer</button>
+                    </div>
+
+                    <div class="checkout-actions">
+                        <button type="button" class="btn btn-primary btn-checkout" onclick="proceedToCheckout()">
+                            💳 Passer commande
+                        </button>
+
+                        <a href="{% url 'liste_produits' %}" class="btn btn-secondary">
+                            ← Continuer mes achats
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="panier-empty">
+            <div class="empty-icon">🛒</div>
+            <h2>Votre panier est vide</h2>
+            <p>Découvrez nos délicieux produits et ajoutez-les à votre panier</p>
+            <a href="{% url 'liste_produits' %}" class="btn btn-primary">
+                ☕ Découvrir nos produits
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.panier-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Arial', sans-serif;
+}
+
+.panier-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+.panier-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.panier-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.panier-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+}
+
+.panier-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.panier-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: 100px 1fr auto auto auto;
+    gap: 1.5rem;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panier-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.item-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #8B4513;
+}
+
+.item-details h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.item-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.item-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.item-category {
+    background: #8B4513;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.stock-warning {
+    background: #ff6b6b;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.item-quantity label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 2px solid #e1e1e1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.qty-btn {
+    background: #f8f9fa;
+    border: none;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: background-color 0.2s;
+}
+
+.qty-btn:hover {
+    background: #8B4513;
+    color: white;
+}
+
+.qty-input {
+    border: none;
+    text-align: center;
+    width: 60px;
+    padding: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.item-price {
+    text-align: right;
+}
+
+.unit-price {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+}
+
+.total-price {
+    color: #8B4513;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.item-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-remove {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-remove:hover {
+    background: #ff5252;
+    transform: scale(1.1);
+}
+
+.summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+}
+
+.summary-card h3 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.summary-line.discount {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.3rem;
+    color: #333;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #8B4513;
+}
+
+.promo-code {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.promo-code input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.btn-promo {
+    background: #8B4513;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-promo:hover {
+    background: #A0522D;
+}
+
+.checkout-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e1e1e1;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    border-color: #8B4513;
+    color: #8B4513;
+}
+
+.panier-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    opacity: 0.5;
+}
+
+.panier-empty h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.panier-empty p {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .panier-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .panier-item {
+        grid-template-columns: 80px 1fr;
+        gap: 1rem;
+    }
+
+    .item-quantity,
+    .item-price,
+    .item-actions {
+        grid-column: 1 / -1;
+        margin-top: 1rem;
+    }
+
+    .item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .item-quantity label {
+        margin-bottom: 0;
+    }
+}
+</style>
+
+<script>
+function updateQuantity(itemId, change) {
+    const input = document.querySelector(`[data-item-id="${itemId}"] .qty-input`);
+    const newValue = parseInt(input.value) + change;
+    if (newValue >= 1) {
+        input.value = newValue;
+        setQuantity(itemId, newValue);
+    }
+}
+
+function setQuantity(itemId, quantity) {
+    // AJAX request to update quantity
+    fetch(`/panier/update/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({quantity: quantity})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Refresh to update totals
+        }
+    });
+}
+
+function removeItem(itemId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+        fetch(`/panier/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-item-id="${itemId}"]`).remove();
+                location.reload();
+            }
+        });
+    }
+}
+
+function applyPromo() {
+    const promoCode = document.getElementById('promo-input').value;
+    if (promoCode) {
+        fetch('/panier/promo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({code: promoCode})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Code promo invalide');
+            }
+        });
+    }
+}
+
+function proceedToCheckout() {
+    window.location.href = '/checkout/';
+}
+</script>
+{% endblock %}

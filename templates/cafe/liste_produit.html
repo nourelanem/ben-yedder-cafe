@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Nos Produits</title>
+</head>
+<body>
+  <h1>Nos Produits</h1>
+  <ul>
+    {% for p in produits %}
+      <li>
+        {# On teste le type pour afficher les infos spécifiques #}
+        {% if p.volume %}
+          <!-- c’est une Boisson -->
+          Boisson : {{ p.nom }} — {{ p.volume }} ml — {{ p.prix }} DT
+        {% elif p.composition and p.__class__.__name__ == 'Cafe' %}
+          <!-- c’est un Café -->
+          Café : {{ p.nom }} — {{ p.composition }} — {{ p.prix }} DT
+        {% elif p.composition and p.__class__.__name__ == 'Viennoiserie' %}
+          <!-- c’est une Viennoiserie -->
+          Viennoiserie : {{ p.nom }} — {{ p.composition }} — {{ p.prix }} DT
+        {% else %}
+          <!-- Au cas où un Produit pur existerait -->
+          Produit : {{ p.nom }} — {{ p.prix }} DT
+        {% endif %}
+
+        <a href="{% url 'ajouter_au_panier' p.id %}">Ajouter au panier</a>
+      </li>
+    {% empty %}
+      <li>Aucun produit disponible.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

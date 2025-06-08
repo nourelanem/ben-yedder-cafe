@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Détails : {{ produit.nom }}</title>
+</head>
+<body>
+  <h1>{{ produit.nom }}</h1>
+  <p>{{ detail }}</p>
+
+  <a href="{% url 'ajouter_au_panier' produit.id %}">
+    Ajouter au panier
+  </a>
+</body>
+</html>

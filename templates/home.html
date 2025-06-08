@@ -1,0 +1,1134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - Ben Yedder{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section avec Slider -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>☕ Bienvenue chez <span class="brand">Ben Yedder</span></h1>
+            <p class="hero-subtitle">🇹🇳 L'art du café tunisien depuis 1985</p>
+            <p class="hero-description">
+                Découvrez notre sélection de cafés d'exception, pâtisseries artisanales
+                et spécialités tunisiennes dans une atmosphère chaleureuse et authentique.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'liste_produits' %}" class="btn btn-primary">
+                    ☕ Découvrir nos produits
+                </a>
+                <a href="#about" class="btn btn-secondary">
+                    ℹ️ En savoir plus
+                </a>
+            </div>
+        </div>
+        <div class="hero-slider">
+            <div class="swiper hero-swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img src="{% static 'img/slide1.jpg' %}" alt="Café Ben Yedder">
+                        <div class="slide-overlay">
+                            <h3>☕ Café Premium</h3>
+                            <p>Grains sélectionnés avec soin</p>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="{% static 'img/slide2.jpg' %}" alt="Pâtisseries Ben Yedder">
+                        <div class="slide-overlay">
+                            <h3>🥐 Pâtisseries Fraîches</h3>
+                            <p>Préparées quotidiennement</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistiques -->
+<section class="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">☕</div>
+                <div class="stat-number">{{ total_produits|default:"50" }}+</div>
+                <div class="stat-label">Produits</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{ total_clients|default:"1000" }}+</div>
+                <div class="stat-label">Clients satisfaits</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-number">35+</div>
+                <div class="stat-label">Années d'expérience</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-number">{{ moyenne_avis|default:"4.8" }}/5</div>
+                <div class="stat-label">Note moyenne</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Produits Vedettes -->
+<section class="produits-vedettes">
+    <div class="container">
+        <div class="section-header">
+            <h2>🌟 Nos Spécialités</h2>
+            <p>Découvrez nos produits les plus appréciés</p>
+        </div>
+
+        <div class="produits-grid">
+            {% for produit in produits %}
+            <div class="produit-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="produit-image">
+                    {% if produit.image %}
+                        <img src="{{ produit.image.url }}" alt="{{ produit.nom }}">
+                    {% else %}
+                        <div class="no-image">☕</div>
+                    {% endif %}
+                    <div class="produit-overlay">
+                        <button class="btn-quick-view" onclick="quickView({{ produit.id }})">
+                            👁️ Aperçu rapide
+                        </button>
+                        <button class="btn-add-cart" onclick="addToCart({{ produit.id }})">
+                            🛒 Ajouter au panier
+                        </button>
+                    </div>
+                </div>
+
+                <div class="produit-info">
+                    <div class="produit-category">{{ produit.categorie|default:"Café" }}</div>
+                    <h3>{{ produit.nom }}</h3>
+                    <p class="produit-description">{{ produit.description|truncatewords:10 }}</p>
+
+                    <div class="produit-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= produit.note_moyenne|default:4 %}
+                                <span class="star filled">⭐</span>
+                            {% else %}
+                                <span class="star">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-count">({{ produit.nb_avis|default:0 }} avis)</span>
+                    </div>
+
+                    <div class="produit-price">
+                        {% if produit.prix_promo %}
+                            <span class="price-old">{{ produit.prix }} DT</span>
+                            <span class="price-new">{{ produit.prix_promo }} DT</span>
+                            <span class="discount">-{{ produit.pourcentage_reduction }}%</span>
+                        {% else %}
+                            <span class="price">{{ produit.prix }} DT</span>
+                        {% endif %}
+                    </div>
+
+                    {% if produit.stock < 5 %}
+                        <div class="stock-warning">⚠️ Plus que {{ produit.stock }} en stock !</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-products">
+                <div class="no-products-icon">📦</div>
+                <h3>Aucun produit disponible</h3>
+                <p>Nos délicieux produits arrivent bientôt !</p>
+                {% if user.is_staff %}
+                    <a href="{% url 'admin:categories_produit_add' %}" class="btn btn-primary">
+                        ➕ Ajouter des produits
+                    </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if produits %}
+        <div class="section-footer">
+            <a href="{% url 'liste_produits' %}" class="btn btn-primary btn-large">
+                🔍 Voir tous nos produits
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- À propos -->
+<section id="about" class="about">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>📖 Notre Histoire</h2>
+                <p>
+                    Fondé en 1985 par la famille Ben Yedder, notre café est devenu une institution
+                    dans le cœur de Tunis. Nous perpétuons les traditions du café tunisien tout
+                    en innovant pour satisfaire les goûts modernes.
+                </p>
+                <p>
+                    Chaque tasse raconte une histoire, chaque grain est choisi avec passion.
+                    Venez découvrir l'authenticité du café tunisien dans notre espace chaleureux.
+                </p>
+
+                <div class="about-features">
+                    <div class="feature">
+                        <div class="feature-icon">🌱</div>
+                        <div class="feature-text">
+                            <h4>Ingrédients naturels</h4>
+                            <p>100% bio et équitable</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">👨‍🍳</div>
+                        <div class="feature-text">
+                            <h4>Savoir-faire artisanal</h4>
+                            <p>Recettes traditionnelles</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🚚</div>
+                        <div class="feature-text">
+                            <h4>Livraison rapide</h4>
+                            <p>Partout en Tunisie</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-image">
+                <img src="{% static 'img/about-cafe.jpg' %}" alt="Café Ben Yedder - Intérieur">
+                <div class="image-badge">
+                    <span>🏆 Depuis 1985</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Témoignages -->
+<section class="testimonials">
+    <div class="container">
+        <div class="section-header">
+            <h2>💬 Ce que disent nos clients</h2>
+            <p>Leurs avis comptent pour nous</p>
+        </div>
+
+        <div class="testimonials-slider">
+            <div class="swiper testimonials-swiper">
+                <div class="swiper-wrapper">
+                    {% for avis in avis_clients %}
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <div class="quote-icon">"</div>
+                                <p>{{ avis.commentaire }}</p>
+                                <div class="testimonial-rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avis.note %}
+                                            <span class="star">⭐</span>
+                                        {% else %}
+                                            <span class="star">☆</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    {{ avis.utilisateur.first_name|first|default:"👤" }}
+                                </div>
+                                <div class="author-info">
+                                    <div class="author-name">{{ avis.utilisateur.get_full_name|default:avis.utilisateur.username }}</div>
+                                    <div class="author-title">Client fidèle</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <div class="quote-icon">"</div>
+                                <p>Le meilleur café de Tunis ! L'ambiance est chaleureuse et les pâtisseries sont délicieuses.</p>
+                                <div class="testimonial-rating">
+                                    <span class="star">⭐⭐⭐⭐⭐</span>
+                                </div>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">A</div>
+                                <div class="author-info">
+                                    <div class="author-name">Amira Ben Ali</div>
+                                    <div class="author-title">Cliente fidèle</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <div class="quote-icon">"</div>
+                                <p>Une tradition familiale qui se ressent dans chaque produit. Je recommande vivement !</p>
+                                <div class="testimonial-rating">
+                                    <span class="star">⭐⭐⭐⭐⭐</span>
+                                </div>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">M</div>
+                                <div class="author-info">
+                                    <div class="author-name">Mohamed Trabelsi</div>
+                                    <div class="author-title">Amateur de café</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter">
+    <div class="container">
+        <div class="newsletter-content">
+            <div class="newsletter-text">
+                <h2>📧 Restez informé</h2>
+                <p>Recevez nos dernières nouveautés et offres spéciales</p>
+            </div>
+            <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+                <input type="email" placeholder="Votre adresse email" required>
+                <button type="submit" class="btn btn-primary">
+                    📨 S'abonner
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #8B4513;
+    --secondary-color: #A0522D;
+    --accent-color: #CD853F;
+    --text-color: #333;
+    --light-bg: #f8f9fa;
+    --white: #ffffff;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 15px;
+    --transition: all 0.3s ease;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+    color: var(--white);
+    padding: 4rem 0;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-text h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    font-weight: bold;
+}
+
+.brand {
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #FFE4B5;
+    font-weight: bold;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    color: #F5F5DC;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-slider {
+    position: relative;
+}
+
+.hero-swiper {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.hero-swiper .swiper-slide {
+    position: relative;
+}
+
+.hero-swiper .swiper-slide img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.slide-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.slide-overlay h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Statistiques */
+.stats {
+    padding: 3rem 0;
+    background: var(--light-bg);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.stat-item {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+/* Sections communes */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.section-header p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Produits */
+.produits-vedettes {
+    padding: 5rem 0;
+}
+
+.produits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.produit-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+}
+
+.produit-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.produit-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.produit-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.produit-card:hover .produit-image img {
+    transform: scale(1.1);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    background: var(--light-bg);
+    color: var(--primary-color);
+}
+
+.produit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(139, 69, 19, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.produit-card:hover .produit-overlay {
+    opacity: 1;
+}
+
+.btn-quick-view,
+.btn-add-cart {
+    background: var(--white);
+    color: var(--primary-color);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-quick-view:hover,
+.btn-add-cart:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
+.produit-info {
+    padding: 1.5rem;
+}
+
+.produit-category {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 0.3rem 1rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.produit-info h3 {
+    font-size: 1.3rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.produit-description {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.produit-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.star {
+    font-size: 1.2rem;
+}
+
+.rating-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.produit-price {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.price-old {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.price-new {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.discount {
+    background: #ff6b6b;
+    color: var(--white);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.stock-warning {
+    background: #ff6b6b;
+    color: var(--white);
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+}
+
+.no-products-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.section-footer {
+    text-align: center;
+}
+
+/* À propos */
+.about {
+    padding: 5rem 0;
+    background: var(--light-bg);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-text h2 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-weight: bold;
+}
+
+.about-text p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.about-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--white);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    width: 60px;
+    text-align: center;
+}
+
+.feature-text h4 {
+    color: var(--text-color);
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+}
+
+.feature-text p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.about-image {
+    position: relative;
+}
+
+.about-image img {
+    width: 100%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.image-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* Témoignages */
+.testimonials {
+    padding: 5rem 0;
+}
+
+.testimonials-swiper {
+    padding-bottom: 3rem;
+}
+
+.testimonial-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.testimonial-content {
+    flex: 1;
+    margin-bottom: 2rem;
+}
+
+.quote-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.testimonial-content p {
+    font-style: italic;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.testimonial-rating {
+    font-size: 1.2rem;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.author-name {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.author-title {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Newsletter */
+.newsletter {
+    padding: 3rem 0;
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.newsletter-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.newsletter-text h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 1rem;
+    min-width: 400px;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+/* Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--white);
+    border: 2px solid var(--white);
+}
+
+.btn-secondary:hover {
+    background: var(--white);
+    color: var(--primary-color);
+}
+
+.btn-large {
+    padding: 1.2rem 3rem;
+    font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .newsletter-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .newsletter-form {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .produits-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+// Initialize Hero Swiper
+const heroSwiper = new Swiper('.hero-swiper', {
+    loop: true,
+    autoplay: {
+        delay: 4000,
+        disableOnInteraction: false,
+    },
+    pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+    },
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+    },
+    effect: 'fade',
+    fadeEffect: {
+        crossFade: true
+    }
+});
+
+// Initialize Testimonials Swiper
+const testimonialsSwiper = new Swiper('.testimonials-swiper', {
+    loop: true,
+    autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+    },
+    pagination: {
+        el: '.testimonials .swiper-pagination',
+        clickable: true,
+    },
+    slidesPerView: 1,
+    spaceBetween: 30,
+    breakpoints: {
+        768: {
+            slidesPerView: 2,
+        },
+        1024: {
+            slidesPerView: 3,
+        }
+    }
+});
+
+// Functions
+function quickView(productId) {
+    // Modal ou redirection vers la page produit
+    window.location.href = `/produit/${productId}/`;
+}
+
+function addToCart(productId) {
+    // AJAX request to add to cart
+    fetch(`/panier/add/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({quantity: 1})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Animation de succès
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Ajouté !';
+            button.style.background = '#28a745';
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+            }, 2000);
+
+            // Mettre à jour le compteur du panier
+            updateCartCounter();
+        } else {
+            alert('Erreur lors de l\'ajout au panier');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erreur lors de l\'ajout au panier');
+    });
+}
+
+function subscribeNewsletter(event) {
+    event.preventDefault();
+    const email = event.target.querySelector('input[type="email"]').value;
+
+    // AJAX request for newsletter subscription
+    fetch('/newsletter/subscribe/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({email: email})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Merci pour votre inscription !');
+            event.target.reset();
+        } else {
+            alert('❌ Erreur lors de l\'inscription');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Erreur lors de l\'inscription');
+    });
+}
+
+function updateCartCounter() {
+    // Mettre à jour le compteur du panier dans la navigation
+    fetch('/panier/count/')
+    .then(response => response.json())
+    .then(data => {
+        const counter = document.querySelector('.cart-counter');
+        if (counter) {
+            counter.textContent = data.count;
+            counter.style.display = data.count > 0 ? 'block' : 'none';
+        }
+    });
+}
+
+// Smooth scroll pour les liens d'ancrage
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Animation au scroll (simple)
+window.addEventListener('scroll', () => {
+    const elements = document.querySelectorAll('.produit-card, .stat-item, .feature');
+    elements.forEach(element => {
+        const elementTop = element.getBoundingClientRect().top;
+        const elementVisible = 150;
+
+        if (elementTop < window.innerHeight - elementVisible) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }
+    });
+});
+
+// Initialiser les animations
+document.addEventListener('DOMContentLoaded', () => {
+    const elements = document.querySelectorAll('.produit-card, .stat-item, .feature');
+    elements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = 'all 0.6s ease';
+    });
+});
+</script>
+{% endblock %}

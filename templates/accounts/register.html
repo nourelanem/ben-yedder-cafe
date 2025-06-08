@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - Ben Yedder{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>✨ Créer un compte</h2>
+            <p>Rejoignez la communauté Ben Yedder</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="register-form">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">👤 Prénom</label>
+                    <input type="text" id="first_name" name="first_name"
+                           placeholder="Votre prénom"
+                           value="{{ form.first_name.value|default:'' }}"
+                           class="form-input">
+                    {% if form.first_name.errors %}
+                        <div class="error-message">
+                            {% for error in form.first_name.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">👤 Nom</label>
+                    <input type="text" id="last_name" name="last_name"
+                           placeholder="Votre nom"
+                           value="{{ form.last_name.value|default:'' }}"
+                           class="form-input">
+                    {% if form.last_name.errors %}
+                        <div class="error-message">
+                            {% for error in form.last_name.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">🏷️ Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required
+                       placeholder="Choisissez un nom d'utilisateur"
+                       value="{{ form.username.value|default:'' }}"
+                       class="form-input">
+                {% if form.username.errors %}
+                    <div class="error-message">
+                        {% for error in form.username.errors %}
+                            <span>❌ {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email">📧 Email</label>
+                <input type="email" id="email" name="email" required
+                       placeholder="votre.email@exemple.com"
+                       value="{{ form.email.value|default:'' }}"
+                       class="form-input">
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <span>❌ {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password1">🔒 Mot de passe</label>
+                    <input type="password" id="password1" name="password1" required
+                           placeholder="Mot de passe"
+                           class="form-input">
+                    {% if form.password1.errors %}
+                        <div class="error-message">
+                            {% for error in form.password1.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="password2">🔒 Confirmer</label>
+                    <input type="password" id="password2" name="password2" required
+                           placeholder="Confirmer le mot de passe"
+                           class="form-input">
+                    {% if form.password2.errors %}
+                        <div class="error-message">
+                            {% for error in form.password2.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="adresse">📍 Adresse</label>
+                <input type="text" id="adresse" name="adresse"
+                       placeholder="Votre adresse complète"
+                       value="{{ form.adresse.value|default:'' }}"
+                       class="form-input">
+                {% if form.adresse.errors %}
+                    <div class="error-message">
+                        {% for error in form.adresse.errors %}
+                            <span>❌ {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="telephone">📱 Téléphone</label>
+                <input type="tel" id="telephone" name="telephone"
+                       placeholder="+216 XX XXX XXX"
+                       value="{{ form.telephone.value|default:'' }}"
+                       class="form-input">
+                {% if form.telephone.errors %}
+                    <div class="error-message">
+                        {% for error in form.telephone.errors %}
+                            <span>❌ {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                        <span>❌ {{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-terms">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="terms" required>
+                    <span class="checkmark">✓</span>
+                    J'accepte les <a href="#" class="terms-link">📋 conditions d'utilisation</a> et la <a href="#" class="terms-link">🔒 politique de confidentialité</a>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                🚀 Créer mon compte
+            </button>
+        </form>
+
+        <div class="register-footer">
+            <p>Déjà un compte ?
+                <a href="{% url 'login' %}" class="login-link">🔐 Se connecter</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+.register-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%);
+    font-family: 'Arial', sans-serif;
+}
+
+.register-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    padding: 3rem;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.register-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #8B4513, #A0522D, #CD853F);
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.register-header h2 {
+    color: #333;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.register-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #fafafa;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #8B4513;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    background: white;
+    transform: translateY(-1px);
+}
+
+.form-terms {
+    margin-bottom: 2rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    font-weight: bold;
+}
+
+.checkbox-container input {
+    margin-right: 0.5rem;
+    margin-top: 0.2rem;
+    transform: scale(1.2);
+}
+
+.terms-link {
+    color: #8B4513;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.terms-link:hover {
+    color: #A0522D;
+    text-decoration: underline;
+}
+
+.btn {
+    width: 100%;
+    padding: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(139, 69, 19, 0.4);
+    background: linear-gradient(135deg, #A0522D 0%, #CD853F 100%);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.register-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e1e1e1;
+}
+
+.register-footer p {
+    color: #666;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.login-link {
+    color: #8B4513;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.login-link:hover {
+    color: #A0522D;
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+    animation: shake 0.5s ease-in-out;
+}
+
+.error-message span {
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        padding: 1rem;
+    }
+
+    .register-card {
+        padding: 2rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .register-header h2 {
+        font-size: 1.8rem;
+    }
+}
+
+/* Effet de validation en temps réel */
+.form-input:valid {
+    border-color: #28a745;
+}
+
+.form-input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
+/* Animation pour les champs requis */
+.form-input[required]:focus {
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1), 0 0 10px rgba(139, 69, 19, 0.2);
+}
+</style>
+{% endblock %}
+  

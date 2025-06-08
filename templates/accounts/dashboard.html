@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - Ben Yedder{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>🏠 Tableau de bord</h1>
+        <p>Bienvenue {{ user.first_name|default:user.username }} !</p>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="dashboard-cards">
+            <div class="dashboard-card">
+                <div class="card-icon">👤</div>
+                <div class="card-content">
+                    <h3>Mon Profil</h3>
+                    <p>Gérer mes informations personnelles</p>
+                    <a href="{% url 'profile' %}" class="btn btn-primary">Voir le profil</a>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">🛒</div>
+                <div class="card-content">
+                    <h3>Mon Panier</h3>
+                    <p>Voir mes articles en cours</p>
+                    <a href="{% url 'panier' %}" class="btn btn-primary">Voir le panier</a>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">📦</div>
+                <div class="card-content">
+                    <h3>Mes Commandes</h3>
+                    <p>Historique de mes achats</p>
+                    <a href="#" class="btn btn-primary">Voir les commandes</a>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">☕</div>
+                <div class="card-content">
+                    <h3>Nos Produits</h3>
+                    <p>Découvrir notre catalogue</p>
+                    <a href="{% url 'liste_produits' %}" class="btn btn-primary">Voir les produits</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{% url 'logout' %}" class="btn btn-secondary">🚪 Se déconnecter</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Arial', sans-serif;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.card-content h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.card-content p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(139, 69, 19, 0.3);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e1e1e1;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    border-color: #8B4513;
+    color: #8B4513;
+}
+
+.dashboard-actions {
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

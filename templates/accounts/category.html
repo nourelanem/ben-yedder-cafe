@@ -1,0 +1,52 @@
+category.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben Yedder Café - Catalogue</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Ben Yedder Café</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="category.html">Catalogue</a>
+            <a href="panier.html">Panier</a>
+            <a href="login.html">Connexion</a>
+        </nav>
+    </header>
+    <main>
+        <section id="products">
+            <h2>Nos Cafés</h2>
+            <div id="filters">
+                <label for="category">Filtrer par catégorie :</label>
+                <select id="category">
+                    <option value="">Toutes</option>
+                </select>
+                <button id="sort-price-asc">Trier par prix (croissant)</button>
+                <button id="sort-price-desc">Trier par prix (décroissant)</button>
+            </div>
+            <div id="product-list">
+                  <div class="product-card">
+                    <img src="images/cafe-colombia.jpg" alt="Café Colombien" class="product-img">
+                    <h3>Café Colombien</h3>
+                    <p>9.99€</p>
+                    <button class="btn-add">Ajouter au panier</button>
+                  </div>
+              </div>
+           
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Ben Yedder Café. Tous droits réservés.</p>
+        <div class="social-links">
+            <a href="#">Facebook</a>
+            <a href="#">Instagram</a>
+            <a href="#">Twitter</a>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>
